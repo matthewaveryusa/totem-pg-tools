@@ -1,0 +1,26 @@
+{
+  "name": "totem-pg-tools",
+  "version": "0.0.4",
+  "description": "Totem postgres tools",
+  "main": "./src/pgtools.js",
+  "scripts": {
+    "pretest": "rm -rf coverage",
+    "test": "istanbul cover _mocha -- --recursive -R spec",
+    "posttest": "istanbul check-coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matthewaveryusa/totem-pg-tools.git"
+  },
+  "author": "Matthew Avery & Zenon Parker",
+  "license": "Private, Totem LLC all rights reserved.",
+  "bugs": {
+    "url": "https://github.com/matthewaveryusa/totem-pg-tools/issues"
+  },
+  "homepage": "https://github.com/matthewaveryusa/totem-pg-tools",
+  "dependencies" : {
+  },
+  "devDependencies": {
+    "should":"*"
+  }
+}
