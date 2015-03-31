@@ -1,7 +1,9 @@
 'use strict';
+
 /**
  * @module libs/pgtools
  */
+const _ = require('lodash');
 
 /**
  * transform the list of fields into quoted fields that can be inserted into a query
@@ -33,4 +35,11 @@ function functionParams(arr) {
 }
 exports.functionParams = functionParams;
 
-
+function makeSelection(selection) {
+  let arr = [];
+  _.forEach(selection,function selectionCB(val,key){
+      arr.push(val + ' AS "'+ key +'"');
+  });
+  return arr.join(',');
+}
+exports.makeSelection = makeSelection;
