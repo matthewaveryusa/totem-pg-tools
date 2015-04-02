@@ -1,6 +1,6 @@
 {
   "name": "totem-pg-tools",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Totem postgres tools",
   "main": "./src/pgtools.js",
   "scripts": {
@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/matthewaveryusa/totem-pg-tools",
   "dependencies" : {
-    "lodash":"*"
+    "lodash":"*",
+    "totem-tools":"*",
+    "pg-db":"*"
   },
   "devDependencies": {
     "should":"*"
