@@ -4,8 +4,9 @@
  * @module libs/pgtools
  */
 const _ = require('lodash'),
-      log = require('tracer').console(),
-      pg = require('pg-db')();
+  log = require('tracer').console(),
+  tools = require('totem-tools'),
+  pg = require('pg-db')();
 
 /**
  * transform the list of fields into quoted fields that can be inserted into a query
@@ -37,14 +38,14 @@ function functionParams(arr) {
 }
 exports.functionParams = functionParams;
 
-function DBError(status,errorCode,query,data) {
-  this.status = status;
-  this.errorCode = errorCode;
+function DBError(code,message,query,data) {
+  this.code = code;
+  this.message = message;
   this.query = query;
   this.data= data;
 }
 
-DBError.prototype.constructor = DEBError;
+DBError.prototype.constructor = DBError;
 
 exports.DBError = DBError;
 
@@ -76,61 +77,61 @@ function wrapError(err, query, data) {
       }
     }
   } else if (_.startsWith(err.message,'No value found for parameter: ')) {
-    return new DBError(err.code, err.message, query, data));
+    return new DBError(err.code, err.message, query, data);
   }
   return new DBError(err.code, err.message, query, data);
 }
 
-function makeQueryCallback(req){
+function makeQueryCallback(query,data,callback){
   const start = Date.now();
-  return function(err,results){
-    log.info('metric','query',Date.now() - start,query,data);
+  return function pgQuery(err,results){
+    log.info('metric', Date.now() - start,query,data);
     if(err) {
-      err = wrapError(err);
+      err = wrapError(err,query,data);
     }
     callback(err,results);
   };
 }
 
-function makeSensitiveQueryCallback(req){
+function makeSensitiveQueryCallback(query,data,callback){
   const start = Date.now();
-  const position = ++req.stats.position;
-  return function(err,results){
-    log.info('metric','query',Date.now() - start,query);
+  return function pgQuery(err,results){
+    log.info('metric',Date.now() - start,query);
     if(err) {
-      err = wrapError(err);
+      err = wrapError(err,query,data);
     }
     callback(err,results);
   };
 }
 
-function query(req,query,data,callback) {
-  pg.query(query,data,(err,makeQueryCallback);
+function query(query,data,callback) {
+  pg.query(query,data,makeQueryCallback(query,data,callback));
 }
 
 exports.query = query;
 
-function queryOne(req,query,data,callback) {
-  pg.queryOne(query,data,(err,makeQueryCallback);
+function queryOne(query,data,callback) {
+  pg.queryOne(query,data,makeQueryCallback(query,data,callback));
 }
 exports.queryOne = queryOne;
 
-function update(req,query,data,callback) {
-  pg.update(query,data,(err,makeQueryCallback);
+function update(query,data,callback) {
+  pg.update(query,data,makeQueryCallback(query,data,callback));
 }
+exports.update = update;
 
 //sensitive queries don't have data attached
-function sensitiveQuery(req,query,data,callback) {
-  pg.query(query,data,(err,makeSensitiveQueryCallback);
+function sensitiveQuery(query,data,callback) {
+  pg.query(query,data,makeSensitiveQueryCallback(query,data,callback));
 }
 exports.sensitiveQuery = sensitiveQuery;
 
-function sensitiveQueryOne(req,query,data,callback) {
-  pg.queryOne(query,data,(err,makeSensitiveQueryCallback);
+function sensitiveQueryOne(query,data,callback) {
+  pg.queryOne(query,data,makeSensitiveQueryCallback(query,data,callback));
 }
 exports.sensitiveQueryOne = sensitiveQueryOne;
 
-function sensitiveUpdate(req,query,data,callback) {
-  pg.update(query,data,(err,makeSensitiveQueryCallback);
+function sensitiveUpdate(query,data,callback) {
+  pg.update(query,data,makeSensitiveQueryCallback(query,data,callback));
 }
 exports.sensitiveUpdate = sensitiveUpdate;
