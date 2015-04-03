@@ -39,10 +39,10 @@ function functionParams(arr) {
 exports.functionParams = functionParams;
 
 function DBError(code,message,query,data) {
-  this.code = code;
+  this.code = code || -1;
   this.message = message;
   this.query = query;
-  this.data= data;
+  this.data= JSON.stringify(data);
 }
 
 DBError.prototype.constructor = DBError;
@@ -82,56 +82,56 @@ function wrapError(err, query, data) {
   return new DBError(err.code, err.message, query, data);
 }
 
-function makeQueryCallback(query,data,callback){
+function makeQueryCallback(queryTag,data,callback){
   const start = Date.now();
   return function pgQuery(err,results){
-    log.info('metric', Date.now() - start,query,data);
+    log.info('metric', Date.now() - start,queryTag,JSON.stringify(data));
     if(err) {
-      err = wrapError(err,query,data);
+      err = wrapError(err,queryTag,data);
     }
     callback(err,results);
   };
 }
 
-function makeSensitiveQueryCallback(query,data,callback){
+function makeSensitiveQueryCallback(queryTag,data,callback){
   const start = Date.now();
   return function pgQuery(err,results){
-    log.info('metric',Date.now() - start,query);
+    log.info('metric',Date.now() - start,queryTag);
     if(err) {
-      err = wrapError(err,query,data);
+      err = wrapError(err,queryTag,data);
     }
     callback(err,results);
   };
 }
 
 function query(query,data,callback) {
-  pg.query(query,data,makeQueryCallback(query,data,callback));
+  pg.query(query[1],data,makeQueryCallback(query[0],data,callback));
 }
 
 exports.query = query;
 
 function queryOne(query,data,callback) {
-  pg.queryOne(query,data,makeQueryCallback(query,data,callback));
+  pg.queryOne(query[1],data,makeQueryCallback(query[0],data,callback));
 }
 exports.queryOne = queryOne;
 
 function update(query,data,callback) {
-  pg.update(query,data,makeQueryCallback(query,data,callback));
+  pg.update(query[1],data,makeQueryCallback(query[0],data,callback));
 }
 exports.update = update;
 
 //sensitive queries don't have data attached
 function sensitiveQuery(query,data,callback) {
-  pg.query(query,data,makeSensitiveQueryCallback(query,data,callback));
+  pg.query(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveQuery = sensitiveQuery;
 
 function sensitiveQueryOne(query,data,callback) {
-  pg.queryOne(query,data,makeSensitiveQueryCallback(query,data,callback));
+  pg.queryOne(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveQueryOne = sensitiveQueryOne;
 
 function sensitiveUpdate(query,data,callback) {
-  pg.update(query,data,makeSensitiveQueryCallback(query,data,callback));
+  pg.update(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveUpdate = sensitiveUpdate;
