@@ -38,6 +38,18 @@ function functionParams(arr) {
 }
 exports.functionParams = functionParams;
 
+/**
+ * transform an array of fields into a list of update assignments.
+ * @param {array} data the array of fields that were requested for update
+ * @param {array} fields the set of updateable fields
+ * @returns {array}
+ */
+function updateParams(data,fields) {
+  const params = _.intersection(_.keys(data),fields);
+  return params.map(function(field){ return `${field} = :${field}`; }).join(',');
+}
+exports.updateParams = updateParams;
+
 function DBError(code,message,query,data) {
   this.code = code || -1;
   this.message = message;
@@ -73,7 +85,7 @@ function wrapError(err, query, data) {
       errorEnumIndex = err.message.indexOf('$');
       /* istanbul ignore else */
       if (errorEnumIndex !== -1) {
-        return new tools.ClientError(422, err.constraint.substring(errorEnumIndex + 1));
+        return new tools.ClientError(422, err.message.substring(errorEnumIndex + 1));
       }
     }
   } else if (_.startsWith(err.message,'No value found for parameter: ')) {
