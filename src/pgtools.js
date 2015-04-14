@@ -122,6 +122,8 @@ function query(query,data,callback) {
 
 exports.query = query;
 
+exports.tx = pg.tx;
+
 function queryOne(query,data,callback) {
   pg.queryOne(query[1],data,makeQueryCallback(query[0],data,callback));
 }
