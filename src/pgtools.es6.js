@@ -3,10 +3,10 @@
 /**
  * @module libs/pgtools
  */
-var _ = require('lodash'),
-    log = require('tracer').console(),
-    tools = require('totem-tools'),
-    pg = require('pg-db')();
+const _ = require('lodash'),
+  log = require('tracer').console(),
+  tools = require('totem-tools'),
+  pg = require('pg-db')();
 
 /**
  * transform the list of fields into quoted fields that can be inserted into a query
@@ -14,9 +14,7 @@ var _ = require('lodash'),
  * @returns {array} transformed fields
  */
 function fields(arr) {
-  return arr.map(function (field) {
-    return '' + field + '';
-  });
+  return arr.map(function(field){ return ''+field+''; });
 }
 exports.fields = fields;
 
@@ -26,9 +24,7 @@ exports.fields = fields;
  * @returns {array} transformed fields
  */
 function namedParams(arr) {
-  return arr.map(function (field) {
-    return ':' + field;
-  });
+  return arr.map(function(field){ return ':' + field; });
 }
 exports.namedParams = namedParams;
 
@@ -38,9 +34,7 @@ exports.namedParams = namedParams;
  * @returns {array} transformed fields
  */
 function functionParams(arr) {
-  return arr.map(function (field) {
-    return '_' + field + ' := :' + field;
-  });
+  return arr.map(function(field){ return '_' + field + ' := :' + field; });
 }
 exports.functionParams = functionParams;
 
@@ -50,19 +44,17 @@ exports.functionParams = functionParams;
  * @param {array} fields the set of updateable fields
  * @returns {array}
  */
-function updateParams(data, fields) {
-  var params = _.intersection(_.keys(data), fields);
-  return params.map(function (field) {
-    return '' + field + ' = :' + field;
-  }).join(',');
+function updateParams(data,fields) {
+  const params = _.intersection(_.keys(data),fields);
+  return params.map(function(field){ return `${field} = :${field}`; }).join(',');
 }
 exports.updateParams = updateParams;
 
-function DBError(code, message, query, data) {
+function DBError(code,message,query,data) {
   this.code = code || -1;
   this.message = message;
   this.query = query;
-  this.data = JSON.stringify(data);
+  this.data= JSON.stringify(data);
 }
 
 DBError.prototype.constructor = DBError;
@@ -70,9 +62,9 @@ DBError.prototype.constructor = DBError;
 exports.DBError = DBError;
 
 function makeSelection(selection) {
-  var arr = [];
-  _.forEach(selection, function selectionCB(val, key) {
-    arr.push(val + ' AS "' + key + '"');
+  let arr = [];
+  _.forEach(selection,function selectionCB(val,key){
+      arr.push(val + ' AS "'+ key +'"');
   });
   return arr.join(',');
 }
@@ -80,8 +72,8 @@ exports.makeSelection = makeSelection;
 
 function wrapError(err, query, data) {
   var errorEnumIndex;
-  if (err.code) {
-    if (err.constraint) {
+  if( err.code ) {
+    if ( err.constraint) {
       errorEnumIndex = err.constraint.indexOf('$');
       /* istanbul ignore else */
       if (errorEnumIndex !== -1) {
@@ -96,65 +88,64 @@ function wrapError(err, query, data) {
         return new tools.ClientError(422, err.message.substring(errorEnumIndex + 1));
       }
     }
-  } else if (_.startsWith(err.message, 'No value found for parameter: ')) {
+  } else if (_.startsWith(err.message,'No value found for parameter: ')) {
     return new DBError(err.code, err.message, query, data);
   }
   return new DBError(err.code, err.message, query, data);
 }
 
-function makeQueryCallback(queryTag, data, callback) {
-  var start = Date.now();
-  return function pgQuery(err, results) {
-    log.info('metric', Date.now() - start, queryTag, JSON.stringify(data));
-    if (err) {
-      err = wrapError(err, queryTag, data);
+function makeQueryCallback(queryTag,data,callback){
+  const start = Date.now();
+  return function pgQuery(err,results){
+    log.info('metric', Date.now() - start,queryTag,JSON.stringify(data));
+    if(err) {
+      err = wrapError(err,queryTag,data);
     }
-    callback(err, results);
+    callback(err,results);
   };
 }
 
-function makeSensitiveQueryCallback(queryTag, data, callback) {
-  var start = Date.now();
-  return function pgQuery(err, results) {
-    log.info('metric', Date.now() - start, queryTag);
-    if (err) {
-      err = wrapError(err, queryTag, data);
+function makeSensitiveQueryCallback(queryTag,data,callback){
+  const start = Date.now();
+  return function pgQuery(err,results){
+    log.info('metric',Date.now() - start,queryTag);
+    if(err) {
+      err = wrapError(err,queryTag,data);
     }
-    callback(err, results);
+    callback(err,results);
   };
 }
 
-function query(query, data, callback) {
-  pg.query(query[1], data, makeQueryCallback(query[0], data, callback));
+function query(query,data,callback) {
+  pg.query(query[1],data,makeQueryCallback(query[0],data,callback));
 }
 
 exports.query = query;
 
 exports.tx = pg.tx;
 
-function queryOne(query, data, callback) {
-  pg.queryOne(query[1], data, makeQueryCallback(query[0], data, callback));
+function queryOne(query,data,callback) {
+  pg.queryOne(query[1],data,makeQueryCallback(query[0],data,callback));
 }
 exports.queryOne = queryOne;
 
-function update(query, data, callback) {
-  pg.update(query[1], data, makeQueryCallback(query[0], data, callback));
+function update(query,data,callback) {
+  pg.update(query[1],data,makeQueryCallback(query[0],data,callback));
 }
 exports.update = update;
 
 //sensitive queries don't have data attached
-function sensitiveQuery(query, data, callback) {
-  pg.query(query[1], data, makeSensitiveQueryCallback(query[0], data, callback));
+function sensitiveQuery(query,data,callback) {
+  pg.query(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveQuery = sensitiveQuery;
 
-function sensitiveQueryOne(query, data, callback) {
-  pg.queryOne(query[1], data, makeSensitiveQueryCallback(query[0], data, callback));
+function sensitiveQueryOne(query,data,callback) {
+  pg.queryOne(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveQueryOne = sensitiveQueryOne;
 
-function sensitiveUpdate(query, data, callback) {
-  pg.update(query[1], data, makeSensitiveQueryCallback(query[0], data, callback));
+function sensitiveUpdate(query,data,callback) {
+  pg.update(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveUpdate = sensitiveUpdate;
-
