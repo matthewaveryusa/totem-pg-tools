@@ -149,3 +149,15 @@ function sensitiveUpdate(query,data,callback) {
   pg.update(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
 }
 exports.sensitiveUpdate = sensitiveUpdate;
+
+function upsert(updateQuery,insertQuery,data,callback) {
+  const query = `WITH upsert AS (${updateQuery[1]} RETURNING *) ${insertQuery[1]} WHERE NOT EXISTS (SELECT * FROM upsert);`;
+  pg.update(query,data,makeQueryCallback(updateQuery[0],data,callback));
+}
+exports.upsert = upsert;
+
+function sensitiveUpsert(updateQuery,insertQuery,data,callback) {
+  const query = `WITH upsert AS (${updateQuery[1]} RETURNING *) ${insertQuery[1]} WHERE NOT EXISTS (SELECT * FROM upsert);`;
+  pg.update(query[1],data,makeSensitiveQueryCallback(updateQuery[0],data,callback));
+}
+exports.sensitiveUpsert = sensitiveUpsert;
