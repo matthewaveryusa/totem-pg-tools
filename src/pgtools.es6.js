@@ -13,30 +13,27 @@ const _ = require('lodash'),
  * @param {array} arr the list of fields
  * @returns {array} transformed fields
  */
-function fields(arr) {
+exports.fields = function(arr) {
   return arr.map(function(field){ return ''+field+''; });
-}
-exports.fields = fields;
+};
 
 /**
  * transform an array of fields into named-parameter format.
  * @param {array} arr the array of fields
  * @returns {array} transformed fields
  */
-function namedParams(arr) {
+exports.namedParams = function (arr) {
   return arr.map(function(field){ return ':' + field; });
-}
-exports.namedParams = namedParams;
+};
 
 /**
  * transform an array of fields into a list of arguments for a function.
  * @param {array} arr the array of fields
  * @returns {array} transformed fields
  */
-function functionParams(arr) {
+exports.functionParams = function(arr) {
   return arr.map(function(field){ return '_' + field + ' := :' + field; });
-}
-exports.functionParams = functionParams;
+};
 
 /**
  * transform an array of fields into a list of update assignments.
@@ -44,31 +41,29 @@ exports.functionParams = functionParams;
  * @param {array} fields the set of updateable fields
  * @returns {array}
  */
-function updateParams(data,fields) {
+exports.updateParams = function(data,fields) {
   const params = _.intersection(_.keys(data),fields);
   return params.map(function(field){ return `${field} = :${field}`; }).join(',');
-}
-exports.updateParams = updateParams;
+};
 
-function DBError(code,message,query,data) {
+class DBError {
+ constructor(code,message,query,data) {
   this.code = code || -1;
   this.message = message;
   this.query = query;
   this.data= JSON.stringify(data);
 }
-
-DBError.prototype.constructor = DBError;
+};
 
 exports.DBError = DBError;
 
-function makeSelection(selection) {
+exports.makeSelection = function (selection) {
   let arr = [];
-  _.forEach(selection,function selectionCB(val,key){
+  _.forEach(selection,function (val,key){
       arr.push(val + ' AS "'+ key +'"');
   });
   return arr.join(',');
-}
-exports.makeSelection = makeSelection;
+};
 
 function wrapError(err, query, data) {
   var errorEnumIndex;
@@ -96,7 +91,7 @@ function wrapError(err, query, data) {
 
 function makeQueryCallback(queryTag,data,callback){
   const start = Date.now();
-  return function pgQuery(err,results){
+  return function (err,results){
     log.info('metric', Date.now() - start,queryTag,JSON.stringify(data));
     if(err) {
       err = wrapError(err,queryTag,data);
@@ -107,7 +102,7 @@ function makeQueryCallback(queryTag,data,callback){
 
 function makeSensitiveQueryCallback(queryTag,data,callback){
   const start = Date.now();
-  return function pgQuery(err,results){
+  return function (err,results){
     log.info('metric',Date.now() - start,queryTag);
     if(err) {
       err = wrapError(err,queryTag,data);
@@ -116,48 +111,39 @@ function makeSensitiveQueryCallback(queryTag,data,callback){
   };
 }
 
-function query(query,data,callback) {
+exports.query = function(query,data,callback) {
   pg.query(query[1],data,makeQueryCallback(query[0],data,callback));
-}
-
-exports.query = query;
+};
 
 exports.tx = pg.tx;
 
-function queryOne(query,data,callback) {
+exports.queryOne = function(query,data,callback) {
   pg.queryOne(query[1],data,makeQueryCallback(query[0],data,callback));
-}
-exports.queryOne = queryOne;
+};
 
-function update(query,data,callback) {
+exports.update = function(query,data,callback) {
   pg.update(query[1],data,makeQueryCallback(query[0],data,callback));
-}
-exports.update = update;
+};
 
 //sensitive queries don't have data attached
-function sensitiveQuery(query,data,callback) {
+exports.sensitiveQuery = function(query,data,callback) {
   pg.query(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
-}
-exports.sensitiveQuery = sensitiveQuery;
+};
 
-function sensitiveQueryOne(query,data,callback) {
+exports.sensitiveQueryOne = function(query,data,callback) {
   pg.queryOne(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
-}
-exports.sensitiveQueryOne = sensitiveQueryOne;
+};
 
-function sensitiveUpdate(query,data,callback) {
+exports.sensitiveUpdate = function(query,data,callback) {
   pg.update(query[1],data,makeSensitiveQueryCallback(query[0],data,callback));
-}
-exports.sensitiveUpdate = sensitiveUpdate;
+};
 
-function upsert(updateQuery,insertQuery,data,callback) {
+exports.upsert = function(updateQuery,insertQuery,data,callback) {
   const query = `WITH upsert AS (${updateQuery[1]} RETURNING *) ${insertQuery[1]} WHERE NOT EXISTS (SELECT * FROM upsert);`;
   pg.update(query,data,makeQueryCallback(updateQuery[0],data,callback));
-}
-exports.upsert = upsert;
+};
 
-function sensitiveUpsert(updateQuery,insertQuery,data,callback) {
+exports.sensitiveUpsert = function(updateQuery,insertQuery,data,callback) {
   const query = `WITH upsert AS (${updateQuery[1]} RETURNING *) ${insertQuery[1]} WHERE NOT EXISTS (SELECT * FROM upsert);`;
   pg.update(query[1],data,makeSensitiveQueryCallback(updateQuery[0],data,callback));
-}
-exports.sensitiveUpsert = sensitiveUpsert;
+};
