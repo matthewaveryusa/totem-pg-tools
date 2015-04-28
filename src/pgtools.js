@@ -10,8 +10,8 @@ var _inherits = function (subClass, superClass) { if (typeof superClass !== 'fun
  * @module libs/pgtools
  */
 var _ = require('lodash'),
-    log = require('tracer').console(),
     tools = require('totem-tools'),
+    log = require('totem-log'),
     pg = require('pg-db')();
 
 /**
@@ -126,7 +126,7 @@ function wrapError(err, query, data) {
 function makeQueryCallback(queryTag, data, callback) {
   var start = Date.now();
   return function (err, results) {
-    log.info('metric', Date.now() - start, queryTag, JSON.stringify(data));
+    log.metric({ time: Date.now() - start, data: JSON.stringify(data) }, queryTag);
     if (err) {
       err = wrapError(err, queryTag, data);
     }
@@ -137,7 +137,7 @@ function makeQueryCallback(queryTag, data, callback) {
 function makeSensitiveQueryCallback(queryTag, data, callback) {
   var start = Date.now();
   return function (err, results) {
-    log.info('metric', Date.now() - start, queryTag);
+    log.metric({ time: Date.now() - start }, queryTag);
     if (err) {
       err = wrapError(err, queryTag, data);
     }
