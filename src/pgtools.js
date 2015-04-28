@@ -2,6 +2,10 @@
 
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+
 /**
  * @module libs/pgtools
  */
@@ -56,14 +60,32 @@ exports.updateParams = function (data, fields) {
   }).join(',');
 };
 
-var DBError = function DBError(code, message, query, data) {
-  _classCallCheck(this, DBError);
+var DBError = (function (_Error) {
+  function DBError(code, message, query, data) {
+    _classCallCheck(this, DBError);
 
-  this.code = code || -1;
-  this.message = message;
-  this.query = query;
-  this.data = JSON.stringify(data);
-};
+    var _this = new _Error();
+
+    _this.__proto__ = DBError.prototype;
+
+    _this.code = code || -1;
+    _this.message = message;
+    _this.query = query;
+    _this.data = JSON.stringify(data);
+    return _this;
+  }
+
+  _inherits(DBError, _Error);
+
+  _createClass(DBError, [{
+    key: 'toString',
+    value: function toString() {
+      return 'code=' + err.code + ' message=' + err.message + ' query=' + err.query + ' data=' + err.data;
+    }
+  }]);
+
+  return DBError;
+})(Error);
 
 ;
 

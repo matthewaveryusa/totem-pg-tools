@@ -46,13 +46,18 @@ exports.updateParams = function(data,fields) {
   return params.map(function(field){ return `${field} = :${field}`; }).join(',');
 };
 
-class DBError {
+class DBError extends Error {
  constructor(code,message,query,data) {
-  this.code = code || -1;
-  this.message = message;
-  this.query = query;
-  this.data= JSON.stringify(data);
-}
+   super();
+   this.code = code || -1;
+   this.message = message;
+   this.query = query;
+   this.data= JSON.stringify(data);
+ }
+
+ toString() {
+  return `code=${err.code} message=${err.message} query=${err.query} data=${err.data}`;
+ }
 };
 
 exports.DBError = DBError;
