@@ -56,7 +56,7 @@ class DBError extends Error {
  }
 
  toString() {
-  return `code=${err.code} message=${err.message} query=${err.query} data=${err.data}`;
+  return `code=${this.code} message=${this.message} query=${this.query} data=${this.data}`;
  }
 };
 

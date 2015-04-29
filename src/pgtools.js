@@ -80,7 +80,7 @@ var DBError = (function (_Error) {
   _createClass(DBError, [{
     key: 'toString',
     value: function toString() {
-      return 'code=' + err.code + ' message=' + err.message + ' query=' + err.query + ' data=' + err.data;
+      return 'code=' + this.code + ' message=' + this.message + ' query=' + this.query + ' data=' + this.data;
     }
   }]);
 
