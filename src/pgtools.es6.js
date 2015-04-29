@@ -110,7 +110,7 @@ function makeSensitiveQueryCallback(queryTag,data,callback){
   return function (err,results){
     log.metric({'time': Date.now() - start},queryTag);
     if(err) {
-      err = wrapError(err,queryTag,data);
+      err = wrapError(err,queryTag,{"sensitive_data_removed":null});
     }
     callback(err,results);
   };

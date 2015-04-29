@@ -1,6 +1,6 @@
 {
   "name": "totem-pg-tools",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Totem postgres tools",
   "main": "./src/pgtools.js",
   "scripts": {
