@@ -150,5 +150,5 @@ exports.upsert = function(updateQuery,insertQuery,data,callback) {
 
 exports.sensitiveUpsert = function(updateQuery,insertQuery,data,callback) {
   const query = `WITH upsert AS (${updateQuery[1]} RETURNING *) ${insertQuery[1]} WHERE NOT EXISTS (SELECT * FROM upsert);`;
-  pg.update(query[1],data,makeSensitiveQueryCallback(updateQuery[0],data,callback));
+  pg.update(query,data,makeSensitiveQueryCallback(updateQuery[0],data,callback));
 };
