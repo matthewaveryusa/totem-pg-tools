@@ -1,6 +1,6 @@
 {
   "name": "totem-pg-tools",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Totem postgres tools",
   "main": "./src/pgtools.js",
   "scripts": {
@@ -13,7 +13,7 @@
     "url": "https://github.com/matthewaveryusa/totem-pg-tools.git"
   },
   "author": "Matthew Avery & Zenon Parker",
-  "license": "Private, Totem LLC all rights reserved.",
+  "license": "UNLICENSED",
   "bugs": {
     "url": "https://github.com/matthewaveryusa/totem-pg-tools/issues"
   },
@@ -21,7 +21,7 @@
   "dependencies" : {
     "lodash":"*",
     "totem-tools":"*",
-    "totem-log":"0.0.2",
+    "totem-log":"*",
     "pg-db":"*"
   },
   "devDependencies": {
