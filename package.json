@@ -1,6 +1,6 @@
 {
   "name": "totem-pg-tools",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Totem postgres tools",
   "main": "./src/pgtools.js",
   "scripts": {
@@ -22,7 +22,8 @@
     "lodash":"*",
     "totem-tools":"*",
     "totem-log":"*",
-    "pg-db":"*"
+    "pg-db":"*",
+    "pg":"*"
   },
   "devDependencies": {
     "should":"*"
