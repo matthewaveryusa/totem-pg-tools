@@ -46,21 +46,21 @@ exports.updateParams = function(data,fields) {
   return params.map(function(field){ return `${field} = :${field}`; }).join(',');
 };
 
-class DBError extends Error {
- constructor(code,message,query,data) {
-   super();
-   this.code = code || -1;
-   this.message = message;
-   this.query = query;
-   this.data= JSON.stringify(data);
- }
+function makeDBError(code,message,query,data) {
+  return {
+    'status':500,
+    'errorCode':'internalError',
+    'serverDetails': {
+      'type' : 'databaseError',
+      'code' : code || -1,
+      'message' : message,
+      'query' : query,
+      'data' : JSON.stringify(data)
+    }
+  };
+}
+exports.makeDBError = makeDBError;
 
- toString() {
-  return `code=${this.code} message=${this.message} query=${this.query} data=${this.data}`;
- }
-};
-
-exports.DBError = DBError;
 
 exports.makeSelection = function (selection) {
   let arr = [];
@@ -77,7 +77,7 @@ function wrapError(err, query, data) {
       errorEnumIndex = err.constraint.indexOf('$');
       /* istanbul ignore else */
       if (errorEnumIndex !== -1) {
-        return new tools.ClientError(422, err.constraint.substring(errorEnumIndex + 1));
+        return tools.makeClientError(422, err.constraint.substring(errorEnumIndex + 1));
       }
     }
 
@@ -85,13 +85,13 @@ function wrapError(err, query, data) {
       errorEnumIndex = err.message.indexOf('$');
       /* istanbul ignore else */
       if (errorEnumIndex !== -1) {
-        return new tools.ClientError(422, err.message.substring(errorEnumIndex + 1));
+        return tools.makeClientError(422, err.message.substring(errorEnumIndex + 1));
       }
     }
   } else if (_.startsWith(err.message,'No value found for parameter: ')) {
-    return new DBError(err.code, err.message, query, data);
+    return makeDBError(err.code, err.message, query, data);
   }
-  return new DBError(err.code, err.message, query, data);
+  return makeDBError(err.code, err.message, query, data);
 }
 
 function makeQueryCallback(queryTag,data,callback){
